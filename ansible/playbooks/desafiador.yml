@@ -1,0 +1,60 @@
+---
+- name: Playbook do Desafio
+  hosts: "{{ maquinas }}"
+  tasks:
+
+  - name: Parando NGINX
+    systemd:
+      name: nginx
+      state: stopped
+    ignore_errors: yes
+
+  - name: Removendo Pacotes - UBUNTU
+    apt:
+      name: nginx
+      state: absent
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Removendo Pacotes - CENTOS
+    yum:
+      name: nginx
+      state: absent
+    when: ansible_distribution == "CentOS"
+
+  - name: Instalando Pacotes - UBUNTU
+    apt:
+      name: ['apache2','libapache2-mod-php7.2','php7.2']
+      state: present
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Instalando Pacotes - CENTOS
+    yum:
+      name: ['httpd','php']
+      state: present
+    notify: httpd  
+    when: ansible_distribution == "CentOS"
+
+  - name: Habilitar modulo PHP
+      apache_module:
+        name: php7.2
+        state: present
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Criar arquivo index.php
+    file:
+      path: "/root/index.php"
+      state: touch
+
+  - name: Copiando arquivo
+    copy:
+      src: /root/index.php
+      dest: /var/www/html/
+
+  - name: Iniciando HTTPD
+    service:
+      name: httpd
+      state: started
+    when: ansible_distribution == "CentOS"
+...

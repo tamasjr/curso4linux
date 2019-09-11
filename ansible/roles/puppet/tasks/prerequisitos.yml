@@ -1,0 +1,11 @@
+- name: Puppet CentOS package
+  get_url:
+    url: "https://yum.puppet.com/puppet6-release-el-7.noarch.rpm"
+    dest: /tmp/puppet.rpm
+  when: ansible_os_family == "RedHat"
+
+- name: Puppet Debian package
+  get_url:
+    url: "https://apt.puppet.com/puppet6-release-{{ ansible_lsb.codename }}.deb"
+    dest: /tmp/puppet.deb
+  when: ansible_os_family == "Debian"
